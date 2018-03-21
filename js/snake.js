@@ -2,7 +2,6 @@ const Coordinate = require('./coordinates');
 
 class Snake {
   constructor(dim) {
-    this.snake = snake;
     this.direction = "U";
     this.position = new Coordinate(Math.floor(dim/2), Math.floor(dim/2));
     this.turning = false;

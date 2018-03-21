@@ -31,5 +31,8 @@ class Board {
     this.snake.position.forEach(position => {
       grid[position.x][position.y] = Snake.LABEL;
     });
+
   }
 }
+
+module.exports = Board;
