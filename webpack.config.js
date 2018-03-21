@@ -1,8 +1,8 @@
 module.exports = {
-  entry: "./lib/main.js",
+  entry: "./js/entry.js",
   output: {
     path: __dirname,
-    filename: "./lib/jquery_lite.js"
+    filename: "bundle.js"
 	},
 	devtool: "source-map"
 };
