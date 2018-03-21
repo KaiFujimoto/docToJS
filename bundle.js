@@ -312,74 +312,192 @@ module.exports = DomNodeCollection;
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Board = __webpack_require__(5);
+
+class View {
+  constructor(el) {
+    this.$el = el;
+    this.board = new Board(20);
+    this.setupGrid();
+
+    this.intervalId = window.setInterval(
+     this.step.bind(this),
+     View.STEP_MILLIS
+  );
+
+    $l('window').on("keydown", this.handleKeyEvent.bind(this));
+  }
+
+  handleKeyEvent(event) {
+    if (View.KEYS[event.keyCode]) {
+      this.board.snake.turn(View.KEYS[event.keyCode]);
+    }
+  }
+
+  render() {
+    this.updateClasses(this.board.snake.position, "snake");
+  }
+
+  updateClasses(position, className) {
+    this.$li.filter(`.${className}`).removeClass();
+    position.forEach( pos => {
+      const posi = (pos.x * this.board.dim) + pos.y;
+      this.$li.eq(posi).addClass(className);
+    });
+  }
+
+  setupGrid() {
+    let html = "";
+
+    for (let i = 0; i < this.board.dim; i++) {
+      html += "<ul>";
+      for (let j = 0; j < this.board.dim; j++) {
+        html += "<li></li>";
+      }
+      html += "</ul>";
+    }
+
+    this.$el.html(html);
+    this.$el = this.$el.find("li");
+  }
+
+  step() {
+    if (this.board.snake.position.length > 0) {
+      this.render();
+    }
+  }
+}
+
+View.KEYS = {
+  38: "U",
+  39: "R",
+  40: "D",
+  37: "L"
+};
+
+View.STEP_MILLIS = 1000;
+
+module.exports = View;
+
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports) {
 
-// const Board = require('./board');
-//
-// class View {
-//   constructor(el) {
-//     this.$el = el;
-//     this.board = new Board(20);
-//     this.setupGrid();
-//
-//     this.intervalId = window.setInterval(
-//      this.step.bind(this),
-//      View.STEP_MILLIS
-//    );
-//
-//     $l('window').on("keydown", this.handleKeyEvent.bind(this));
-//   }
-//
-//   handleKeyEvent(event) {
-//     if (View.KEYS[event.keyCode]) {
-//       this.board.snake.turn(View.KEYS[event.keyCode]);
-//     }
-//   }
-//
-//   render() {
-//     this.updateClasses(this.board.snake.position, "snake");
-//   }
-//
-//   updateClasses(position, className) {
-//     this.$li.filter(`.${className}`).removeClass();
-//     position.forEach( pos => {
-//       const posi = (pos.x * this.board.dim) + pos.y;
-//       this.$li.eq(posi).addClass(className);
-//     });
-//   }
-//
-//   setupGrid() {
-//     let html = "";
-//
-//     for (let i = 0; i < this.board.dim; i++) {
-//       html += "<ul>";
-//       for (let j = 0; j < this.board.dim; j++) {
-//         html += "<li></li>";
-//       }
-//       html += "</ul>";
-//     }
-//
-//     this.$el.html(html);
-//     this.$el = this.$el.find("li");
-//   }
-//
-//   step() {
-//     if (this.board.snake.position.length > 0) {
-//       this.render();
-//     }
-//   }
-// }
-//
-// View.KEYS = {
-//   38: "U",
-//   39: "R",
-//   40: "D",
-//   37: "L"
-// };
-//
-// View.STEP_MILLIS = 1000;
-//
-// module.exports = View;
+class Coordinate {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  shift(newPosition) {
+    this.x = this.x + newPosition[0];
+    this.y = this.y + newPosition[1];
+  }
+
+  shiftCheck(newPosition) {
+    return !((newPosition[0] === this.x) && (newPosition[1] === this.y));
+  }
+
+  sameDirection(newPosition) {
+    return ((newPosition[0] === this.x) || (newPosition[1] === this.y));
+  }
+}
+
+module.exports = Coordinate;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Snake = __webpack_require__(6);
+const Coordinate = __webpack_require__(4);
+
+class Board {
+  constructor(dim) {
+    this.dim = dim;
+    this.snake = new Snake(dim);
+  }
+
+  static newBoard() {
+    let grid = [];
+
+    for (let i = 0; i < dim; i++) {
+      let row = [];
+      for (let j = 0; j < dim; j++) {
+        row.push([i,j]);
+      }
+      grid.push(row);
+    }
+
+    return grid;
+  }
+
+  validMove() {
+    return (this.snake.position.x >= 0) && (this.snake.position.y < this.dim) && (this.snake.position.x < this.dim) && (this.snake.position.y >= 0);
+  }
+
+  render() {
+    let grid = Board.newBoard();
+
+    this.snake.position.forEach(position => {
+      grid[position.x][position.y] = Snake.LABEL;
+    });
+
+  }
+}
+
+module.exports = Board;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Coordinate = __webpack_require__(4);
+
+class Snake {
+  constructor(dim) {
+    this.direction = "U";
+    this.position = new Coordinate(Math.floor(dim/2), Math.floor(dim/2));
+    this.turning = false;
+  }
+
+  currentPosition() {
+    this.position.slice(-1);
+  }
+
+  move(direction) {
+    this.position.push(currentPosition.shift(
+      Snake.TURNS[direction])
+    );
+
+    this.turning = false;
+  }
+
+  turn(coordinate) {
+    if (!(coordinate.sameDirection(this.position))) {
+      this.turning = true;
+    }
+  }
+
+}
+
+Snake.DIRECTIONS = ["U", "D", "L", "R"];
+
+Snake.TURNS = {
+  "U": new Coordinate(0, 1),
+  "D": new Coordinate(0, -1),
+  "L": new Coordinate(-1, 0),
+  "R": new Coordinate(1, 0)
+};
+
+Snake.LABEL = 's';
+
+module.exports = Snake;
 
 
 /***/ })
