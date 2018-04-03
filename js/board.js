@@ -22,8 +22,7 @@ class Board {
   }
 
   validMove() {
-
-    return (this.snake.position.x >= 0) && (this.snake.position.y < this.dim) && (this.snake.position.x < this.dim) && (this.snake.position.y >= 0);
+    return (this.snake.position[0].x >= 0) && (this.snake.position[0].y < this.dim) && (this.snake.position[0].x < this.dim) && (this.snake.position[0].y >= 0);
   }
 
   render() {

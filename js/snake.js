@@ -15,15 +15,14 @@ class Snake {
   checkMove() {
     const snake = this.currentPosition();
 
-    if (!this.board.validMove(snake)) {
+    if (this.board.validMove(snake)) {
+      return true;
+    } else if ((this.crashedIntoSelf())) {
+      return true;
+    } else {
       return false;
     }
 
-    if (!(this.crashedIntoSelf())) {
-      return false;
-    }
-
-    return true;
   }
 
   crashedIntoSelf() {
@@ -47,7 +46,7 @@ class Snake {
 
     this.position.shift();
 
-    if (this.checkMove()) {
+    if (!(this.checkMove())) {
       this.destroySnek();
     }
   }

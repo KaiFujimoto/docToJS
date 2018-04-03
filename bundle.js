@@ -367,12 +367,7 @@ class View {
   }
 
   render() {
-    debugger
-    if (this.board.snake.checkMove()) {
-      this.gameOver = true;
-    } else {
       this.updateClasses(this.board.snake.position, "snake");
-    }
   }
 
   updateClasses(position, className) {
@@ -384,7 +379,12 @@ class View {
 
     position.forEach( pos => {
       const posi = (pos.x * this.board.dim) + pos.y;
-      $l(this.$li[posi]).addClass(className);
+      if ($l(this.$li[posi]) === undefined) {
+        this.gameOver = true;
+        return;
+      } else {
+        $l(this.$li[posi]).addClass(className);
+      }
     });
   }
 
@@ -451,8 +451,7 @@ class Board {
   }
 
   validMove() {
-
-    return (this.snake.position.x >= 0) && (this.snake.position.y < this.dim) && (this.snake.position.x < this.dim) && (this.snake.position.y >= 0);
+    return (this.snake.position[0].x >= 0) && (this.snake.position[0].y < this.dim) && (this.snake.position[0].x < this.dim) && (this.snake.position[0].y >= 0);
   }
 
   render() {
@@ -489,15 +488,14 @@ class Snake {
   checkMove() {
     const snake = this.currentPosition();
 
-    if (!this.board.validMove(snake)) {
+    if (this.board.validMove(snake)) {
+      return true;
+    } else if ((this.crashedIntoSelf())) {
+      return true;
+    } else {
       return false;
     }
 
-    if (!(this.crashedIntoSelf())) {
-      return false;
-    }
-
-    return true;
   }
 
   crashedIntoSelf() {
@@ -521,7 +519,7 @@ class Snake {
 
     this.position.shift();
 
-    if (this.checkMove()) {
+    if (!(this.checkMove())) {
       this.destroySnek();
     }
   }

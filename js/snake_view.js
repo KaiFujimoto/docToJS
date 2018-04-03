@@ -25,12 +25,7 @@ class View {
   }
 
   render() {
-    debugger
-    if (this.board.snake.checkMove()) {
-      this.gameOver = true;
-    } else {
       this.updateClasses(this.board.snake.position, "snake");
-    }
   }
 
   updateClasses(position, className) {
@@ -42,7 +37,12 @@ class View {
 
     position.forEach( pos => {
       const posi = (pos.x * this.board.dim) + pos.y;
-      $l(this.$li[posi]).addClass(className);
+      if ($l(this.$li[posi]) === undefined) {
+        this.gameOver = true;
+        return;
+      } else {
+        $l(this.$li[posi]).addClass(className);
+      }
     });
   }
 
