@@ -4,7 +4,7 @@ const Coordinate = require('./coordinates');
 class Board {
   constructor(dim) {
     this.dim = dim;
-    this.snake = new Snake(dim);
+    this.snake = new Snake(this);
   }
 
   static newBoard() {
@@ -22,6 +22,7 @@ class Board {
   }
 
   validMove() {
+
     return (this.snake.position.x >= 0) && (this.snake.position.y < this.dim) && (this.snake.position.x < this.dim) && (this.snake.position.y >= 0);
   }
 

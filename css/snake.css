@@ -26,9 +26,6 @@ figure {
   border: 10px solid black;
 }
 
-ul {
-}
-
 ul:after {
   content: "";
   clear: both;

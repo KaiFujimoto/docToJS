@@ -3,15 +3,19 @@ const Board = require('./board');
 class View {
   constructor(el) {
     this.$el = el;
+    this.$li = null;
     this.board = new Board(20);
     this.setupGrid();
+    this.gameOver = false;
 
-    this.intervalId = window.setInterval(
-     this.step.bind(this),
-     View.STEP_MILLIS
-  );
+    if (!this.gameOver) {
+      this.intervalId = window.setInterval(
+        this.step.bind(this),
+        View.STEP_MILLIS
+      );
+    }
 
-    $l('window').on("keydown", this.handleKeyEvent.bind(this));
+    $l("html").on("keydown", this.handleKeyEvent.bind(this));
   }
 
   handleKeyEvent(event) {
@@ -21,14 +25,24 @@ class View {
   }
 
   render() {
-    this.updateClasses(this.board.snake.position, "snake");
+    debugger
+    if (this.board.snake.checkMove()) {
+      this.gameOver = true;
+    } else {
+      this.updateClasses(this.board.snake.position, "snake");
+    }
   }
 
   updateClasses(position, className) {
-    this.$li.filter(`.${className}`).removeClass();
+    this.$li.forEach((li) => {
+      if (li.className === className) {
+        li.className = '';
+      }
+    });
+
     position.forEach( pos => {
       const posi = (pos.x * this.board.dim) + pos.y;
-      this.$li.eq(posi).addClass(className);
+      $l(this.$li[posi]).addClass(className);
     });
   }
 
@@ -44,11 +58,12 @@ class View {
     }
 
     this.$el.html(html);
-    this.$el = this.$el.find("li");
+    this.$li = this.$el.find("li");
   }
 
   step() {
     if (this.board.snake.position.length > 0) {
+      this.board.snake.move();
       this.render();
     }
   }

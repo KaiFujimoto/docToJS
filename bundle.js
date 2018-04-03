@@ -60,15 +60,41 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports) {
+
+class Coordinate {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  plus(newPosition) {
+    return new Coordinate(this.x + newPosition.x, this.y + newPosition.y);
+  }
+
+  equals(newPosition) {
+    return !((newPosition[0] === this.x) && (newPosition[1] === this.y));
+  }
+
+  isOpposite(newPosition) {
+    return ((newPosition[0] === (-1 * this.x)) || (newPosition[1] === (-1 * this.y)));
+  }
+}
+
+module.exports = Coordinate;
+
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const $l = __webpack_require__(1);
-const View = __webpack_require__(3);
+const $l = __webpack_require__(2);
+const View = __webpack_require__(4);
 
 $l(function () {
   const rootEl = $l('.snake-game');
@@ -77,10 +103,10 @@ $l(function () {
 
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const DomNodeCollection = __webpack_require__(2);
+const DomNodeCollection = __webpack_require__(3);
 
 const queue = [];
 let loaded = false;
@@ -152,7 +178,7 @@ module.exports = $l;
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 class DomNodeCollection {
@@ -311,7 +337,7 @@ module.exports = DomNodeCollection;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Board = __webpack_require__(5);
@@ -319,15 +345,19 @@ const Board = __webpack_require__(5);
 class View {
   constructor(el) {
     this.$el = el;
+    this.$li = null;
     this.board = new Board(20);
     this.setupGrid();
+    this.gameOver = false;
 
-    this.intervalId = window.setInterval(
-     this.step.bind(this),
-     View.STEP_MILLIS
-  );
+    if (!this.gameOver) {
+      this.intervalId = window.setInterval(
+        this.step.bind(this),
+        View.STEP_MILLIS
+      );
+    }
 
-    $l('window').on("keydown", this.handleKeyEvent.bind(this));
+    $l("html").on("keydown", this.handleKeyEvent.bind(this));
   }
 
   handleKeyEvent(event) {
@@ -337,14 +367,24 @@ class View {
   }
 
   render() {
-    this.updateClasses(this.board.snake.position, "snake");
+    debugger
+    if (this.board.snake.checkMove()) {
+      this.gameOver = true;
+    } else {
+      this.updateClasses(this.board.snake.position, "snake");
+    }
   }
 
   updateClasses(position, className) {
-    this.$li.filter(`.${className}`).removeClass();
+    this.$li.forEach((li) => {
+      if (li.className === className) {
+        li.className = '';
+      }
+    });
+
     position.forEach( pos => {
       const posi = (pos.x * this.board.dim) + pos.y;
-      this.$li.eq(posi).addClass(className);
+      $l(this.$li[posi]).addClass(className);
     });
   }
 
@@ -360,11 +400,12 @@ class View {
     }
 
     this.$el.html(html);
-    this.$el = this.$el.find("li");
+    this.$li = this.$el.find("li");
   }
 
   step() {
     if (this.board.snake.position.length > 0) {
+      this.board.snake.move();
       this.render();
     }
   }
@@ -383,43 +424,16 @@ module.exports = View;
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-class Coordinate {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-
-  shift(newPosition) {
-    this.x = this.x + newPosition[0];
-    this.y = this.y + newPosition[1];
-  }
-
-  shiftCheck(newPosition) {
-    return !((newPosition[0] === this.x) && (newPosition[1] === this.y));
-  }
-
-  sameDirection(newPosition) {
-    return ((newPosition[0] === this.x) || (newPosition[1] === this.y));
-  }
-}
-
-module.exports = Coordinate;
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Snake = __webpack_require__(6);
-const Coordinate = __webpack_require__(4);
+const Coordinate = __webpack_require__(0);
 
 class Board {
   constructor(dim) {
     this.dim = dim;
-    this.snake = new Snake(dim);
+    this.snake = new Snake(this);
   }
 
   static newBoard() {
@@ -437,6 +451,7 @@ class Board {
   }
 
   validMove() {
+
     return (this.snake.position.x >= 0) && (this.snake.position.y < this.dim) && (this.snake.position.x < this.dim) && (this.snake.position.y >= 0);
   }
 
@@ -457,31 +472,68 @@ module.exports = Board;
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Coordinate = __webpack_require__(4);
+const Coordinate = __webpack_require__(0);
 
 class Snake {
-  constructor(dim) {
+  constructor(board) {
     this.direction = "U";
-    this.position = new Coordinate(Math.floor(dim/2), Math.floor(dim/2));
+    this.position = [new Coordinate(Math.floor(board.dim/2), Math.floor(board.dim/2))];
+    this.board = board;
     this.turning = false;
   }
 
   currentPosition() {
-    this.position.slice(-1);
+    return this.position.slice(this.position.length - 1);
   }
 
-  move(direction) {
-    this.position.push(currentPosition.shift(
-      Snake.TURNS[direction])
-    );
+  checkMove() {
+    const snake = this.currentPosition();
 
-    this.turning = false;
-  }
-
-  turn(coordinate) {
-    if (!(coordinate.sameDirection(this.position))) {
-      this.turning = true;
+    if (!this.board.validMove(snake)) {
+      return false;
     }
+
+    if (!(this.crashedIntoSelf())) {
+      return false;
+    }
+
+    return true;
+  }
+
+  crashedIntoSelf() {
+    for (let i = 0; i < this.position.length - 1; i++) {
+      if (this.position[i].equals(this.currentPosition())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  destroySnek() {
+    this.position = [];
+  }
+
+  move() {
+    this.position.push(this.currentPosition()[0].plus(
+      Snake.TURNS[this.direction])
+    );
+    this.turning = false;
+
+    this.position.shift();
+
+    if (this.checkMove()) {
+      this.destroySnek();
+    }
+  }
+
+  turn(direction) {
+    if ((Snake.TURNS[this.direction].isOpposite(Snake.TURNS[direction])) || this.turning) {
+      return false;
+    } else {
+      this.turning = true;
+      this.direction = direction;
+    }
+
   }
 
 }
@@ -489,10 +541,10 @@ class Snake {
 Snake.DIRECTIONS = ["U", "D", "L", "R"];
 
 Snake.TURNS = {
-  "U": new Coordinate(0, 1),
-  "D": new Coordinate(0, -1),
-  "L": new Coordinate(-1, 0),
-  "R": new Coordinate(1, 0)
+  "U": new Coordinate(-1, 0),
+  "D": new Coordinate(1, 0),
+  "L": new Coordinate(0, -1),
+  "R": new Coordinate(0, 1)
 };
 
 Snake.LABEL = 's';

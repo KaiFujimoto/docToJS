@@ -1,28 +1,65 @@
 const Coordinate = require('./coordinates');
 
 class Snake {
-  constructor(dim) {
+  constructor(board) {
     this.direction = "U";
-    this.position = new Coordinate(Math.floor(dim/2), Math.floor(dim/2));
+    this.position = [new Coordinate(Math.floor(board.dim/2), Math.floor(board.dim/2))];
+    this.board = board;
     this.turning = false;
   }
 
   currentPosition() {
-    this.position.slice(-1);
+    return this.position.slice(this.position.length - 1);
   }
 
-  move(direction) {
-    this.position.push(currentPosition.shift(
-      Snake.TURNS[direction])
-    );
+  checkMove() {
+    const snake = this.currentPosition();
 
-    this.turning = false;
-  }
-
-  turn(coordinate) {
-    if (!(coordinate.sameDirection(this.position))) {
-      this.turning = true;
+    if (!this.board.validMove(snake)) {
+      return false;
     }
+
+    if (!(this.crashedIntoSelf())) {
+      return false;
+    }
+
+    return true;
+  }
+
+  crashedIntoSelf() {
+    for (let i = 0; i < this.position.length - 1; i++) {
+      if (this.position[i].equals(this.currentPosition())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  destroySnek() {
+    this.position = [];
+  }
+
+  move() {
+    this.position.push(this.currentPosition()[0].plus(
+      Snake.TURNS[this.direction])
+    );
+    this.turning = false;
+
+    this.position.shift();
+
+    if (this.checkMove()) {
+      this.destroySnek();
+    }
+  }
+
+  turn(direction) {
+    if ((Snake.TURNS[this.direction].isOpposite(Snake.TURNS[direction])) || this.turning) {
+      return false;
+    } else {
+      this.turning = true;
+      this.direction = direction;
+    }
+
   }
 
 }
@@ -30,10 +67,10 @@ class Snake {
 Snake.DIRECTIONS = ["U", "D", "L", "R"];
 
 Snake.TURNS = {
-  "U": new Coordinate(0, 1),
-  "D": new Coordinate(0, -1),
-  "L": new Coordinate(-1, 0),
-  "R": new Coordinate(1, 0)
+  "U": new Coordinate(-1, 0),
+  "D": new Coordinate(1, 0),
+  "L": new Coordinate(0, -1),
+  "R": new Coordinate(0, 1)
 };
 
 Snake.LABEL = 's';

@@ -4,17 +4,16 @@ class Coordinate {
     this.y = y;
   }
 
-  shift(newPosition) {
-    this.x = this.x + newPosition[0];
-    this.y = this.y + newPosition[1];
+  plus(newPosition) {
+    return new Coordinate(this.x + newPosition.x, this.y + newPosition.y);
   }
 
-  shiftCheck(newPosition) {
+  equals(newPosition) {
     return !((newPosition[0] === this.x) && (newPosition[1] === this.y));
   }
 
-  sameDirection(newPosition) {
-    return ((newPosition[0] === this.x) || (newPosition[1] === this.y));
+  isOpposite(newPosition) {
+    return ((newPosition[0] === (-1 * this.x)) || (newPosition[1] === (-1 * this.y)));
   }
 }
 
