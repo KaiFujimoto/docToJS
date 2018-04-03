@@ -6,6 +6,13 @@ html, body, figure, figcaption, ul, li, h1 {
   text-align: inherit;
 }
 
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 5px 5px 5px 5px;
+  margin: 10px 10px 10px 10px;
+}
+
 ul {
   list-style: none;
 }
@@ -38,10 +45,47 @@ li {
   height: 20px;
 }
 
-.apple {
-  background: red;
+.mouse {
+  background: brown;
 }
 
 .snake {
   background: green;
+}
+
+.section-main {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-game {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  position: relative;
+}
+
+.presstopause {
+  font-size: 30px;
+}
+
+.paused {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+}
+
+.paused p {
+  color: black;
+  padding: 5px 5px 5px 5px;
+}
+
+.unpaused {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  display: none;
 }

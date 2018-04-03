@@ -1,10 +1,12 @@
 const Snake = require('./snake');
 const Coordinate = require('./coordinates');
+const Mouse = require('./mouse');
 
 class Board {
   constructor(dim) {
     this.dim = dim;
     this.snake = new Snake(this);
+    this.mouse = new Mouse(this);
   }
 
   static newBoard() {
@@ -21,8 +23,8 @@ class Board {
     return grid;
   }
 
-  validMove() {
-    return (this.snake.position[0].x >= 0) && (this.snake.position[0].y < this.dim) && (this.snake.position[0].x < this.dim) && (this.snake.position[0].y >= 0);
+  validMove(snake) {
+    return (snake[0].x >= 0) && (snake[0].y < this.dim) && (snake[0].x < this.dim) && (snake[0].y >= 0);
   }
 
   render() {
@@ -31,6 +33,8 @@ class Board {
     this.snake.position.forEach(position => {
       grid[position.x][position.y] = Snake.LABEL;
     });
+
+    this.mouse.replace();
 
   }
 }

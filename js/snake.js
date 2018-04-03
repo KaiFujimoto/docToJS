@@ -1,4 +1,5 @@
 const Coordinate = require('./coordinates');
+const Mouse = require('./mouse');
 
 class Snake {
   constructor(board) {
@@ -6,6 +7,7 @@ class Snake {
     this.position = [new Coordinate(Math.floor(board.dim/2), Math.floor(board.dim/2))];
     this.board = board;
     this.turning = false;
+    this.growing = 0;
   }
 
   currentPosition() {
@@ -14,28 +16,47 @@ class Snake {
 
   checkMove() {
     const snake = this.currentPosition();
-
-    if (this.board.validMove(snake)) {
-      return true;
-    } else if ((this.crashedIntoSelf())) {
-      return true;
-    } else {
+    if (this.board.validMove(snake) && !(this.crashedIntoSelf())) {
       return false;
+    } else {
+      return true;
     }
 
   }
 
   crashedIntoSelf() {
+    let crashed = false;
     for (let i = 0; i < this.position.length - 1; i++) {
-      if (this.position[i].equals(this.currentPosition())) {
-        return true;
+      if (this.position[i].equals(this.currentPosition()[0])) {
+        crashed = true;
+        return crashed;
       }
     }
-    return false;
+    return crashed;
+  }
+
+  isAt(position) {
+    let result = false;
+    this.position.forEach(pos => {
+
+      if (pos.x === position[0] && pos.y === position[1]) {
+        result = true;
+        return result;
+      }
+    });
+    return result;
   }
 
   destroySnek() {
     this.position = [];
+  }
+
+  eatOrNotEatMouse() {
+    if (this.currentPosition()[0].x === this.board.mouse.position[0].x && this.currentPosition()[0].y === this.board.mouse.position[0].y) {
+      this.growing += 1;
+      return true;
+    }
+    return false;
   }
 
   move() {
@@ -44,9 +65,17 @@ class Snake {
     );
     this.turning = false;
 
-    this.position.shift();
+    if (this.eatOrNotEatMouse()) {
+      this.board.mouse.replace();
+    }
 
-    if (!(this.checkMove())) {
+    if (this.growing > 0) {
+      this.growing -= 1;
+    } else {
+      this.position.shift();
+    }
+
+    if ((this.checkMove())) {
       this.destroySnek();
     }
   }

@@ -9,7 +9,7 @@ class Coordinate {
   }
 
   equals(newPosition) {
-    return !((newPosition[0] === this.x) && (newPosition[1] === this.y));
+    return (newPosition.x === this.x) && (newPosition.y === this.y);
   }
 
   isOpposite(newPosition) {

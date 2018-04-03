@@ -78,7 +78,7 @@ class Coordinate {
   }
 
   equals(newPosition) {
-    return !((newPosition[0] === this.x) && (newPosition[1] === this.y));
+    return (newPosition.x === this.x) && (newPosition.y === this.y);
   }
 
   isOpposite(newPosition) {
@@ -184,7 +184,6 @@ module.exports = $l;
 class DomNodeCollection {
   constructor(nodes) {
     this.nodes = nodes;
-
   }
 
   on(eventName, callback) {
@@ -349,31 +348,60 @@ class View {
     this.board = new Board(20);
     this.setupGrid();
     this.gameOver = false;
-
-    if (!this.gameOver) {
-      this.intervalId = window.setInterval(
-        this.step.bind(this),
-        View.STEP_MILLIS
-      );
-    }
+    this.pause = false;
+    this.play();
 
     $l("html").on("keydown", this.handleKeyEvent.bind(this));
+
+    $l("button.presstopause").on("mousedown", this.handleMouseDownEvent.bind(this));
+  }
+
+  handleMouseDownEvent() {
+    if ($l('div').nodes[0].className === "unpaused") {
+      $l('div').nodes[0].className = "paused";
+      this.pause = true;
+    } else {
+      $l('div').nodes[0].className = "unpaused";
+      this.pause = false;
+      this.play();
+    }
   }
 
   handleKeyEvent(event) {
-    if (View.KEYS[event.keyCode]) {
-      this.board.snake.turn(View.KEYS[event.keyCode]);
+    switch (event.keyCode) {
+      case 38:
+        this.board.snake.turn("U");
+        break;
+      case 39:
+        this.board.snake.turn("R");
+        break;
+      case 40:
+        this.board.snake.turn("D");
+        break;
+      case 37:
+        this.board.snake.turn("L");
+        break;
+      case 32:
+        if (this.pause === true) {
+          this.pause = false;
+          this.play();
+        } else {
+          this.pause = true;
+        }
+        return this.pause;
+
     }
   }
 
   render() {
       this.updateClasses(this.board.snake.position, "snake");
+      this.updateClasses(this.board.mouse.position, "mouse");
   }
 
   updateClasses(position, className) {
     this.$li.forEach((li) => {
-      if (li.className === className) {
-        li.className = '';
+      if (li.className.includes(className)) {
+        $l(li).removeClass(className);
       }
     });
 
@@ -403,22 +431,37 @@ class View {
     this.$li = this.$el.find("li");
   }
 
+  play() {
+    if (this.gameOver) {
+      console.log("gameover");
+    } else if (this.paused) {
+      console.log('paused');
+    } else {
+      this.interval = window.setInterval(
+        this.step.bind(this),
+        View.STEP_MILLIS
+      );
+    }
+  }
+
+
   step() {
-    if (this.board.snake.position.length > 0) {
+    if (this.board.snake.position.length > 0 && !this.pause) {
       this.board.snake.move();
       this.render();
+    } else if (this.pause) {
+      console.log("pause");
+      window.clearInterval(this.interval);
+    } else {
+      console.log("you lost");
+      window.clearInterval(this.interval);
     }
   }
 }
 
-View.KEYS = {
-  38: "U",
-  39: "R",
-  40: "D",
-  37: "L"
-};
 
-View.STEP_MILLIS = 1000;
+
+View.STEP_MILLIS = 500;
 
 module.exports = View;
 
@@ -429,11 +472,13 @@ module.exports = View;
 
 const Snake = __webpack_require__(6);
 const Coordinate = __webpack_require__(0);
+const Mouse = __webpack_require__(7);
 
 class Board {
   constructor(dim) {
     this.dim = dim;
     this.snake = new Snake(this);
+    this.mouse = new Mouse(this);
   }
 
   static newBoard() {
@@ -450,8 +495,8 @@ class Board {
     return grid;
   }
 
-  validMove() {
-    return (this.snake.position[0].x >= 0) && (this.snake.position[0].y < this.dim) && (this.snake.position[0].x < this.dim) && (this.snake.position[0].y >= 0);
+  validMove(snake) {
+    return (snake[0].x >= 0) && (snake[0].y < this.dim) && (snake[0].x < this.dim) && (snake[0].y >= 0);
   }
 
   render() {
@@ -460,6 +505,8 @@ class Board {
     this.snake.position.forEach(position => {
       grid[position.x][position.y] = Snake.LABEL;
     });
+
+    this.mouse.replace();
 
   }
 }
@@ -472,6 +519,7 @@ module.exports = Board;
 /***/ (function(module, exports, __webpack_require__) {
 
 const Coordinate = __webpack_require__(0);
+const Mouse = __webpack_require__(7);
 
 class Snake {
   constructor(board) {
@@ -479,6 +527,7 @@ class Snake {
     this.position = [new Coordinate(Math.floor(board.dim/2), Math.floor(board.dim/2))];
     this.board = board;
     this.turning = false;
+    this.growing = 0;
   }
 
   currentPosition() {
@@ -487,28 +536,47 @@ class Snake {
 
   checkMove() {
     const snake = this.currentPosition();
-
-    if (this.board.validMove(snake)) {
-      return true;
-    } else if ((this.crashedIntoSelf())) {
-      return true;
-    } else {
+    if (this.board.validMove(snake) && !(this.crashedIntoSelf())) {
       return false;
+    } else {
+      return true;
     }
 
   }
 
   crashedIntoSelf() {
+    let crashed = false;
     for (let i = 0; i < this.position.length - 1; i++) {
-      if (this.position[i].equals(this.currentPosition())) {
-        return true;
+      if (this.position[i].equals(this.currentPosition()[0])) {
+        crashed = true;
+        return crashed;
       }
     }
-    return false;
+    return crashed;
+  }
+
+  isAt(position) {
+    let result = false;
+    this.position.forEach(pos => {
+
+      if (pos.x === position[0] && pos.y === position[1]) {
+        result = true;
+        return result;
+      }
+    });
+    return result;
   }
 
   destroySnek() {
     this.position = [];
+  }
+
+  eatOrNotEatMouse() {
+    if (this.currentPosition()[0].x === this.board.mouse.position[0].x && this.currentPosition()[0].y === this.board.mouse.position[0].y) {
+      this.growing += 1;
+      return true;
+    }
+    return false;
   }
 
   move() {
@@ -517,9 +585,17 @@ class Snake {
     );
     this.turning = false;
 
-    this.position.shift();
+    if (this.eatOrNotEatMouse()) {
+      this.board.mouse.replace();
+    }
 
-    if (!(this.checkMove())) {
+    if (this.growing > 0) {
+      this.growing -= 1;
+    } else {
+      this.position.shift();
+    }
+
+    if ((this.checkMove())) {
       this.destroySnek();
     }
   }
@@ -548,6 +624,35 @@ Snake.TURNS = {
 Snake.LABEL = 's';
 
 module.exports = Snake;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Coordinate = __webpack_require__(0);
+
+class Mouse {
+  constructor(board) {
+    this.board = board;
+    this.position = null;
+    this.replace();
+  }
+
+  replace() {
+  let x = Math.floor(Math.random() * this.board.dim);
+  let y = Math.floor(Math.random() * this.board.dim);
+
+  while (this.board.snake.isAt([x, y])) {
+    x = Math.floor(Math.random() * this.board.dim);
+    y = Math.floor(Math.random() * this.board.dim);
+  }
+
+    this.position = [new Coordinate(x, y)];
+  }
+}
+
+module.exports = Mouse;
 
 
 /***/ })

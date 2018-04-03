@@ -7,31 +7,60 @@ class View {
     this.board = new Board(20);
     this.setupGrid();
     this.gameOver = false;
-
-    if (!this.gameOver) {
-      this.intervalId = window.setInterval(
-        this.step.bind(this),
-        View.STEP_MILLIS
-      );
-    }
+    this.pause = false;
+    this.play();
 
     $l("html").on("keydown", this.handleKeyEvent.bind(this));
+
+    $l("button.presstopause").on("mousedown", this.handleMouseDownEvent.bind(this));
+  }
+
+  handleMouseDownEvent() {
+    if ($l('div').nodes[0].className === "unpaused") {
+      $l('div').nodes[0].className = "paused";
+      this.pause = true;
+    } else {
+      $l('div').nodes[0].className = "unpaused";
+      this.pause = false;
+      this.play();
+    }
   }
 
   handleKeyEvent(event) {
-    if (View.KEYS[event.keyCode]) {
-      this.board.snake.turn(View.KEYS[event.keyCode]);
+    switch (event.keyCode) {
+      case 38:
+        this.board.snake.turn("U");
+        break;
+      case 39:
+        this.board.snake.turn("R");
+        break;
+      case 40:
+        this.board.snake.turn("D");
+        break;
+      case 37:
+        this.board.snake.turn("L");
+        break;
+      case 32:
+        if (this.pause === true) {
+          this.pause = false;
+          this.play();
+        } else {
+          this.pause = true;
+        }
+        return this.pause;
+
     }
   }
 
   render() {
       this.updateClasses(this.board.snake.position, "snake");
+      this.updateClasses(this.board.mouse.position, "mouse");
   }
 
   updateClasses(position, className) {
     this.$li.forEach((li) => {
-      if (li.className === className) {
-        li.className = '';
+      if (li.className.includes(className)) {
+        $l(li).removeClass(className);
       }
     });
 
@@ -61,21 +90,36 @@ class View {
     this.$li = this.$el.find("li");
   }
 
+  play() {
+    if (this.gameOver) {
+      console.log("gameover");
+    } else if (this.paused) {
+      console.log('paused');
+    } else {
+      this.interval = window.setInterval(
+        this.step.bind(this),
+        View.STEP_MILLIS
+      );
+    }
+  }
+
+
   step() {
-    if (this.board.snake.position.length > 0) {
+    if (this.board.snake.position.length > 0 && !this.pause) {
       this.board.snake.move();
       this.render();
+    } else if (this.pause) {
+      console.log("pause");
+      window.clearInterval(this.interval);
+    } else {
+      console.log("you lost");
+      window.clearInterval(this.interval);
     }
   }
 }
 
-View.KEYS = {
-  38: "U",
-  39: "R",
-  40: "D",
-  37: "L"
-};
 
-View.STEP_MILLIS = 1000;
+
+View.STEP_MILLIS = 500;
 
 module.exports = View;
