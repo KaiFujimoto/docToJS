@@ -13,7 +13,7 @@ class Coordinate {
   }
 
   isOpposite(newPosition) {
-    return ((newPosition[0] === (-1 * this.x)) || (newPosition[1] === (-1 * this.y)));
+    return ((newPosition.x === (-1 * this.x)) || (newPosition.y === (-1 * this.y)));
   }
 }
 

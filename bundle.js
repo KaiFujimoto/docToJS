@@ -82,7 +82,7 @@ class Coordinate {
   }
 
   isOpposite(newPosition) {
-    return ((newPosition[0] === (-1 * this.x)) || (newPosition[1] === (-1 * this.y)));
+    return ((newPosition.x === (-1 * this.x)) || (newPosition.y === (-1 * this.y)));
   }
 }
 
@@ -345,25 +345,49 @@ class View {
   constructor(el) {
     this.$el = el;
     this.$li = null;
-    this.board = new Board(20);
+    this.board = new Board(30);
     this.setupGrid();
-    this.gameOver = false;
+    this.gameOver = true;
     this.pause = false;
-    this.play();
 
     $l("html").on("keydown", this.handleKeyEvent.bind(this));
 
-    $l("button.presstopause").on("mousedown", this.handleMouseDownEvent.bind(this));
+    $l("button.presstopause").on("mousedown", this.handleMousePause.bind(this));
+
+    $l("button.presstoplay").on("mousedown", this.handleMousePlay.bind(this));
   }
 
-  handleMouseDownEvent() {
-    if ($l('div').nodes[0].className === "unpaused") {
-      $l('div').nodes[0].className = "paused";
-      this.pause = true;
-    } else {
-      $l('div').nodes[0].className = "unpaused";
+  handleMousePlay() {
+    if ($l('div').nodes[0].className === "paused") {
+      return;
+    } else if (!this.gameOver) {
+      this.board = new Board(30);
+      this.setupGrid();
+      window.clearInterval(this.interval);
+      this.gameOver = true;
       this.pause = false;
+      this.speed = 500;
       this.play();
+    } else {
+      this.board = new Board(30);
+      window.clearInterval(this.interval);
+      this.gameOver = false;
+      this.pause = false;
+      this.speed = 500;
+      this.play();
+    }
+  }
+
+  handleMousePause () {
+    if (!this.gameOver) {
+      if ($l('div').nodes[0].className === "unpaused") {
+        $l('div').nodes[0].className = "paused";
+        this.pause = true;
+      } else {
+        $l('div').nodes[0].className = "unpaused";
+        this.pause = false;
+        this.play();
+      }
     }
   }
 
@@ -381,14 +405,6 @@ class View {
       case 37:
         this.board.snake.turn("L");
         break;
-      case 32:
-        if (this.pause === true) {
-          this.pause = false;
-          this.play();
-        } else {
-          this.pause = true;
-        }
-        return this.pause;
 
     }
   }
@@ -433,13 +449,13 @@ class View {
 
   play() {
     if (this.gameOver) {
-      console.log("gameover");
+      return;
     } else if (this.paused) {
-      console.log('paused');
+      return;
     } else {
       this.interval = window.setInterval(
         this.step.bind(this),
-        View.STEP_MILLIS
+        this.speed
       );
     }
   }
@@ -450,18 +466,13 @@ class View {
       this.board.snake.move();
       this.render();
     } else if (this.pause) {
-      console.log("pause");
       window.clearInterval(this.interval);
     } else {
-      console.log("you lost");
       window.clearInterval(this.interval);
     }
   }
 }
 
-
-
-View.STEP_MILLIS = 500;
 
 module.exports = View;
 

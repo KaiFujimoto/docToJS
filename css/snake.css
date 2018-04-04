@@ -11,6 +11,7 @@ button {
   -moz-appearance: none;
   padding: 5px 5px 5px 5px;
   margin: 10px 10px 10px 10px;
+  font-size: 30px;
 }
 
 ul {
@@ -21,6 +22,8 @@ body {
   font-family: sans-serif;
   text-align: center;
   font-weight: bold;
+  margin: auto;
+  margin-top: 50px;
 }
 
 h1 {
@@ -46,11 +49,29 @@ li {
 }
 
 .mouse {
-  background: brown;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid brown;
 }
 
 .snake {
   background: green;
+  border: red;
+  border-radius: 50%;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 500px;
+}
+
+.buttonoptions {
+  display: flex;
+  flex-direction: column;
 }
 
 .section-main {
@@ -68,9 +89,9 @@ li {
   position: relative;
 }
 
-.presstopause {
+/* .presstopause {
   font-size: 30px;
-}
+} */
 
 .paused {
   position: absolute;
