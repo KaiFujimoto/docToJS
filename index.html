@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title></title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="./bundle.js"></script>
     <link rel="stylesheet" href="./css/snake.css">
@@ -21,9 +22,28 @@
           <p>PAUSED</p>
           <p> Press the Pause again to Keep Playing </p>
         </div>
-        <div class="unpaused">
-          <p>PAUSED</p>
-          <p> Press Space to Keep Playing </p>
+        <div class="gamegoing">
+          <p>Game Over</p>
+          <p> Press Play/Restart to Play Again </p>
+        </div>
+        <div class="how-to-play">
+          <h2> How to Play: </h2>
+          <section class="demo-table">
+            <aside class="demo-table-description">
+              <img class="demo" src="updemo.png">
+              <p> Move the snake Up </p>
+              <img class="demo" src="leftdemo.png">
+              <p> Move the snake Left </p>
+            </aside>
+            <aside class="demo-table-description">
+              <img class="demo" src="downdemo.png">
+              <p> Move the snake Down </p>
+              <img class="demo" src="rightdemo.png">
+              <p> Move the snake Right </p>
+            </aside>
+          </section>
+          <h3> The goal is to eat the mouses and grow the snake! </h3>
+          <img class="snake-eat" src="snake_eat.png">
         </div>
         <figure class="snake-game"></figure>
       </sidebar>

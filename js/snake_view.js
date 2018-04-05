@@ -4,36 +4,46 @@ class View {
   constructor(el) {
     this.$el = el;
     this.$li = null;
-    this.board = new Board(30);
+    this.board = new Board({dim: 30});
     this.setupGrid();
     this.gameOver = true;
     this.pause = false;
 
     $l("html").on("keydown", this.handleKeyEvent.bind(this));
 
+    $l("html").on("mousedown", this.removeInstructions.bind(this));
+
     $l("button.presstopause").on("mousedown", this.handleMousePause.bind(this));
 
     $l("button.presstoplay").on("mousedown", this.handleMousePlay.bind(this));
+  }
+
+  reset() {
+    this.board = new Board({dim: 30});
+    window.clearInterval(this.interval);
+    this.pause = false;
+    this.speed = 250;
+  }
+
+  removeInstructions() {
+    $l('div.how-to-play').nodes[0].className = "demo-hide";
+    $l("html").off("mousedown", this.removeInstructions.bind(this));
   }
 
   handleMousePlay() {
     if ($l('div').nodes[0].className === "paused") {
       return;
     } else if (!this.gameOver) {
-      this.board = new Board(30);
+      this.reset();
       this.setupGrid();
-      window.clearInterval(this.interval);
       this.gameOver = true;
-      this.pause = false;
-      this.speed = 500;
-      this.play();
+      $l('div.gamegoing').nodes[0].className = "gameover";
     } else {
-      this.board = new Board(30);
-      window.clearInterval(this.interval);
+      this.reset();
       this.gameOver = false;
-      this.pause = false;
-      this.speed = 500;
       this.play();
+      $l('div.gameover').nodes[0].className = "gamegoing";
+
     }
   }
 
@@ -119,6 +129,11 @@ class View {
     }
   }
 
+  gameOverHandler() {
+    this.reset();
+    $l('div.gamegoing').nodes[0].className = "gameover";
+    this.gameOver = true;
+  }
 
   step() {
     if (this.board.snake.position.length > 0 && !this.pause) {
@@ -128,6 +143,7 @@ class View {
       window.clearInterval(this.interval);
     } else {
       window.clearInterval(this.interval);
+      this.gameOverHandler();
     }
   }
 }

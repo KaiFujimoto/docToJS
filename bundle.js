@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -93,8 +93,37 @@ module.exports = Coordinate;
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const $l = __webpack_require__(2);
-const View = __webpack_require__(4);
+const Coordinate = __webpack_require__(0);
+
+class Mouse {
+  constructor(board) {
+    this.board = board;
+    this.position = null;
+    this.replace();
+  }
+
+  replace() {
+  let x = Math.floor(Math.random() * this.board.dim);
+  let y = Math.floor(Math.random() * this.board.dim);
+
+  while (this.board.snake.isAt([x, y])) {
+    x = Math.floor(Math.random() * this.board.dim);
+    y = Math.floor(Math.random() * this.board.dim);
+  }
+
+    this.position = [new Coordinate(x, y)];
+  }
+}
+
+module.exports = Mouse;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const $l = __webpack_require__(3);
+const View = __webpack_require__(5);
 
 $l(function () {
   const rootEl = $l('.snake-game');
@@ -103,10 +132,10 @@ $l(function () {
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const DomNodeCollection = __webpack_require__(3);
+const DomNodeCollection = __webpack_require__(4);
 
 const queue = [];
 let loaded = false;
@@ -178,7 +207,7 @@ module.exports = $l;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 class DomNodeCollection {
@@ -336,45 +365,55 @@ module.exports = DomNodeCollection;
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Board = __webpack_require__(5);
+const Board = __webpack_require__(6);
 
 class View {
   constructor(el) {
     this.$el = el;
     this.$li = null;
-    this.board = new Board(30);
+    this.board = new Board({dim: 30});
     this.setupGrid();
     this.gameOver = true;
     this.pause = false;
 
     $l("html").on("keydown", this.handleKeyEvent.bind(this));
 
+    $l("html").on("mousedown", this.removeInstructions.bind(this));
+
     $l("button.presstopause").on("mousedown", this.handleMousePause.bind(this));
 
     $l("button.presstoplay").on("mousedown", this.handleMousePlay.bind(this));
+  }
+
+  reset() {
+    this.board = new Board({dim: 30});
+    window.clearInterval(this.interval);
+    this.pause = false;
+    this.speed = 250;
+  }
+
+  removeInstructions() {
+    $l('div.how-to-play').nodes[0].className = "demo-hide";
+    $l("html").off("mousedown", this.removeInstructions.bind(this));
   }
 
   handleMousePlay() {
     if ($l('div').nodes[0].className === "paused") {
       return;
     } else if (!this.gameOver) {
-      this.board = new Board(30);
+      this.reset();
       this.setupGrid();
-      window.clearInterval(this.interval);
       this.gameOver = true;
-      this.pause = false;
-      this.speed = 500;
-      this.play();
+      $l('div.gamegoing').nodes[0].className = "gameover";
     } else {
-      this.board = new Board(30);
-      window.clearInterval(this.interval);
+      this.reset();
       this.gameOver = false;
-      this.pause = false;
-      this.speed = 500;
       this.play();
+      $l('div.gameover').nodes[0].className = "gamegoing";
+
     }
   }
 
@@ -460,6 +499,11 @@ class View {
     }
   }
 
+  gameOverHandler() {
+    this.reset();
+    $l('div.gamegoing').nodes[0].className = "gameover";
+    this.gameOver = true;
+  }
 
   step() {
     if (this.board.snake.position.length > 0 && !this.pause) {
@@ -469,6 +513,7 @@ class View {
       window.clearInterval(this.interval);
     } else {
       window.clearInterval(this.interval);
+      this.gameOverHandler();
     }
   }
 }
@@ -478,16 +523,16 @@ module.exports = View;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Snake = __webpack_require__(6);
+const Snake = __webpack_require__(7);
 const Coordinate = __webpack_require__(0);
-const Mouse = __webpack_require__(7);
+const Mouse = __webpack_require__(1);
 
 class Board {
-  constructor(dim) {
-    this.dim = dim;
+  constructor(options) {
+    this.dim = options.dim;
     this.snake = new Snake(this);
     this.mouse = new Mouse(this);
   }
@@ -526,11 +571,11 @@ module.exports = Board;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Coordinate = __webpack_require__(0);
-const Mouse = __webpack_require__(7);
+const Mouse = __webpack_require__(1);
 
 class Snake {
   constructor(board) {
@@ -598,6 +643,7 @@ class Snake {
 
     if (this.eatOrNotEatMouse()) {
       this.board.mouse.replace();
+
     }
 
     if (this.growing > 0) {
@@ -635,35 +681,6 @@ Snake.TURNS = {
 Snake.LABEL = 's';
 
 module.exports = Snake;
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Coordinate = __webpack_require__(0);
-
-class Mouse {
-  constructor(board) {
-    this.board = board;
-    this.position = null;
-    this.replace();
-  }
-
-  replace() {
-  let x = Math.floor(Math.random() * this.board.dim);
-  let y = Math.floor(Math.random() * this.board.dim);
-
-  while (this.board.snake.isAt([x, y])) {
-    x = Math.floor(Math.random() * this.board.dim);
-    y = Math.floor(Math.random() * this.board.dim);
-  }
-
-    this.position = [new Coordinate(x, y)];
-  }
-}
-
-module.exports = Mouse;
 
 
 /***/ })

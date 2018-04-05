@@ -67,6 +67,7 @@ class Snake {
 
     if (this.eatOrNotEatMouse()) {
       this.board.mouse.replace();
+
     }
 
     if (this.growing > 0) {

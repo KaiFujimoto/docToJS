@@ -3,8 +3,8 @@ const Coordinate = require('./coordinates');
 const Mouse = require('./mouse');
 
 class Board {
-  constructor(dim) {
-    this.dim = dim;
+  constructor(options) {
+    this.dim = options.dim;
     this.snake = new Snake(this);
     this.mouse = new Mouse(this);
   }

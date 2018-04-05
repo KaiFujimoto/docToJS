@@ -110,3 +110,49 @@ li {
   border: 1px solid black;
   display: none;
 }
+
+.gamegoing {
+  display: none;
+}
+
+.gameover {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  height: 500px;
+  width: 400px;
+}
+
+.how-to-play {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  height: 600px;
+  width: 600px;
+}
+
+.demo {
+  height: 100px;
+  width: 100px;
+}
+
+.demo-table {
+  display: flex;
+  justify-content: space-around;
+  margin: auto;
+}
+
+.demo-table-description {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.snake-eat {
+  height: 150px;
+  width: 400px;
+}
+
+.demo-hide {
+  display: none;
+}
