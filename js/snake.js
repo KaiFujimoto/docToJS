@@ -53,7 +53,7 @@ class Snake {
 
   eatOrNotEatMouse() {
     if (this.currentPosition()[0].x === this.board.mouse.position[0].x && this.currentPosition()[0].y === this.board.mouse.position[0].y) {
-      this.growing += 1;
+      this.growing += 3;
       return true;
     }
     return false;
@@ -67,7 +67,6 @@ class Snake {
 
     if (this.eatOrNotEatMouse()) {
       this.board.mouse.replace();
-
     }
 
     if (this.growing > 0) {

@@ -8,6 +8,7 @@ class View {
     this.setupGrid();
     this.gameOver = true;
     this.pause = false;
+    this.currentClass = null;
 
     $l("html").on("keydown", this.handleKeyEvent.bind(this));
 
@@ -42,7 +43,9 @@ class View {
       this.reset();
       this.gameOver = false;
       this.play();
-      $l('div.gameover').nodes[0].className = "gamegoing";
+      if ($l('div.gameover').nodes[0] != undefined) {
+        $l('div.gameover').nodes[0].className = "gamegoing";
+      }
 
     }
   }
@@ -80,7 +83,7 @@ class View {
 
   render() {
       this.updateClasses(this.board.snake.position, "snake");
-      this.updateClasses(this.board.mouse.position, "mouse");
+      this.updateMouseClasses(this.board.mouse.position, this.board.mouse.class);
   }
 
   updateClasses(position, className) {
@@ -99,6 +102,27 @@ class View {
         $l(this.$li[posi]).addClass(className);
       }
     });
+  }
+
+  updateMouseClasses(position, className) {
+
+      this.$li.forEach((li) => {
+        if (li.className.includes(this.currentClass)) {
+          $l(li).removeClass(this.currentClass);
+        }
+      });
+
+      position.forEach( pos => {
+        const posi = (pos.x * this.board.dim) + pos.y;
+        if ($l(this.$li[posi]) === undefined) {
+          this.gameOver = true;
+          return;
+        } else {
+          $l(this.$li[posi]).addClass(className);
+          this.currentClass = className;
+        }
+      });
+      
   }
 
   setupGrid() {
