@@ -85,7 +85,8 @@ class DomNodeCollection {
     this.each(e => {
       let classNames = e.className.split(" ");
       if (!classNames.includes(className)) {
-        e.className = (`${e.className} ${className}`).trim();      }
+        e.className = (`${e.className} ${className}`).trim();
+      }
     });
 
     return this.nodes;
