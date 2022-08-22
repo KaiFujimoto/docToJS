@@ -2,7 +2,7 @@
 
 docToJS is a small JavaScript library that helps client-side scripting of HTML.
 
-[Basic Snake Game Implementation of docToJS](http://kai-sophia-chen.com/docToJS/)
+[Basic Snake Game Implementation of docToJS](http://kai-james-chen.com/docToJS/)
 
 Highlights:
 -------------------------------------------
